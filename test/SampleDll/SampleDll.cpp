@@ -10,13 +10,13 @@ static INT WINAPI MessageBoxW_Hook(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption,
     return sg_fnMessageBoxW(hWnd, lpText, lpCaption, uType);
 }
 
-static void StartHook(HMODULE hDllBase)
+static void StartHook(HMODULE /* hDllBase */)
 {
     ::MessageBoxW(nullptr, L"Sample dll injected!", nullptr, NULL);
     ZQF::ZxHook::Detours::AttachDirectly(&sg_fnMessageBoxW, MessageBoxW_Hook);
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID /* lpReserved */)
 {
     switch (ul_reason_for_call)
     {
