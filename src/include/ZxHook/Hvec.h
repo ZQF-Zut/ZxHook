@@ -8,7 +8,7 @@
 
 namespace ZQF::ZxHook
 {
-    template <auto vcHookFuncList>
+    template <typename T, T... HookFuns>
     class Hvec
     {
     public:
@@ -23,20 +23,22 @@ namespace ZQF::ZxHook
             void* pRaw;
             void* pHook;
         };
-        std::array<Entry, vcHookFuncList.size()> m_aIndex;
+        std::array<Entry, sizeof...(HookFuns)> m_aIndex;
 
         auto GetEntry(size_t nIndex) noexcept -> Entry&
         {
             return m_aIndex[nIndex];
         }
 
-        template <auto pHokFuncPtr>
+        template <auto pHookFuncPtr>
         static constexpr auto GetIndex() -> size_t
         {
+            constexpr T hook_func_array[] = { HookFuns... };
+
             size_t seq = 0;
-            for (auto hook_func_ptr : vcHookFuncList)
+            for (auto hook_func_ptr : hook_func_array)
             {
-                if ((decltype(hook_func_ptr))pHokFuncPtr == hook_func_ptr)
+                if ((decltype(hook_func_ptr))pHookFuncPtr == hook_func_ptr)
                 {
                     return seq;
                 }
@@ -88,6 +90,12 @@ namespace ZQF::ZxHook
             }
         }
     };
+
+    template <typename T, T... HookFuns>
+    auto MakeHvec()
+    {
+        return Hvec<T, HookFuns...>{};
+    }
 
 } // namespace ZxHook
 
