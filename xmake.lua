@@ -32,7 +32,7 @@ target("zxhook")
             add_rules("utils.symbols.export_all", {export_classes = true})
         end
     end
-    add_files("src/src/**.cpp")
+    add_files("src/src/ZxHook/**.cpp")
     add_includedirs("src/include", {public = true})
     add_headerfiles("src/include/(**.h)")
     add_syslinks("user32")
