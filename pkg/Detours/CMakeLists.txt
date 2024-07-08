@@ -19,7 +19,7 @@ FetchContent_Declare(
 
 FetchContent_Populate(Detours)
 
-if(detours_POPULATED)
+if((detours_POPULATED) AND (NOT TARGET Detours_Static))
   add_library(Detours_Static STATIC
     "${detours_SOURCE_DIR}/src/creatwth.cpp"
     "${detours_SOURCE_DIR}/src/detours.cpp"
