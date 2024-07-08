@@ -26,7 +26,8 @@ static auto __cdecl ReadScript_Hook(const char* cpText) -> int;
 static auto __cdecl FooCdeclCall_Hook(const char* cpText) -> int;
 static auto __fastcall FooThisCall_Hook(int ecx, int edx, const char* cpText) -> int;
 
-
+// hook func type
+using Fn_ReadScript_t = decltype(&::ReadScript_Hook);
 
 // manager defined
 static auto GetHvec() -> auto&
@@ -84,11 +85,11 @@ static auto __stdcall CopyFileA_Hook(LPCSTR lpExistingFileName, LPCSTR lpNewFile
 
 auto main() -> int
 {
-    ::GetHvec().Push<::CopyFileA_Hook>(::CopyFileA);
-    ::GetHvec().Push<::MessageBoxA_Hook>(::MessageBoxA);
-    ::GetHvec().Push<::FooThisCall_Hook>(::FoolThisCall);
-    ::GetHvec().Push<::FooCdeclCall_Hook>(FooCdeclCall);
-    ::GetHvec().Push<::ReadScript_Hook>(reinterpret_cast<decltype(&::ReadScript_Hook)>(::GetModuleHandleA(nullptr) + 0x100));
+    ::GetHvec().Reg<::CopyFileA_Hook>(::CopyFileA);
+    ::GetHvec().Reg<::MessageBoxA_Hook>(::MessageBoxA);
+    ::GetHvec().Reg<::FooThisCall_Hook>(::FoolThisCall);
+    ::GetHvec().Reg<::FooCdeclCall_Hook>(::FooCdeclCall);
+    ::GetHvec().Reg<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleA(nullptr) + 0x100));
     ::GetHvec().AttachAll();
 
     ::FooCdeclCall("hook this!");

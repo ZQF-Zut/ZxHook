@@ -50,7 +50,7 @@ namespace ZQF::ZxHook
 
     public:
         template <auto pHookFuncPtr>
-        auto Push(decltype(pHookFuncPtr) pRawFuncPtr) noexcept -> auto&
+        auto Reg(decltype(pHookFuncPtr) pRawFuncPtr) noexcept -> auto&
         {
             constexpr size_t index = Hvec::GetIndex<pHookFuncPtr>();
             m_aIndex[index].pRaw = reinterpret_cast<void*>(pRawFuncPtr);
