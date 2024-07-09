@@ -19,35 +19,32 @@ static auto __cdecl FooCdeclCall(const char* cpText) -> int
     return 10;
 }
 
-// hook function decl
+// custom hvec type decl
 static auto __stdcall MessageBoxA_Hook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)->INT;
 static auto __stdcall CopyFileA_Hook(LPCSTR lpExistingFileName, LPCSTR lpNewFileName, BOOL bFailIfExists)->BOOL;
 static auto __cdecl ReadScript_Hook(const char* cpText) -> int;
 static auto __cdecl FooCdeclCall_Hook(const char* cpText) -> int;
 static auto __fastcall FooThisCall_Hook(int ecx, int edx, const char* cpText) -> int;
+using MyHvec_t = ZQF::ZxHook::MakeHvecType
+<
+    (void*)MessageBoxA_Hook,
+    (void*)CopyFileA_Hook,
+    (void*)ReadScript_Hook,
+    (void*)FooCdeclCall_Hook,
+    (void*)FooThisCall_Hook
+>;
 
 // hook func type
 using Fn_ReadScript_t = decltype(&::ReadScript_Hook);
 
-// manager defined
-static auto GetHvec() -> auto&
-{
-    static auto sg_Hvec = ZQF::ZxHook::MakeHvec
-        <
-        void*,
-        (void*)MessageBoxA_Hook,
-        (void*)CopyFileA_Hook,
-        (void*)ReadScript_Hook,
-        (void*)FooCdeclCall_Hook,
-        (void*)FooThisCall_Hook
-        >();
-    return sg_Hvec;
-}
+// instantiate custom hvec type 
+static auto sg_Hvec = MyHvec_t{};
 
+// hvec auxiliary func
 template <auto pHokFuncPtr>
 static auto GetHvecRaw() noexcept
 {
-    return GetHvec().GetRaw<pHokFuncPtr>();
+    return sg_Hvec.GetRaw<pHokFuncPtr>();
 }
 
 // hook function imp
@@ -83,14 +80,15 @@ static auto __stdcall CopyFileA_Hook(LPCSTR lpExistingFileName, LPCSTR lpNewFile
     return GetHvecRaw<::CopyFileA_Hook>()(lpExistingFileName, lpNewFileName, bFailIfExists);
 }
 
+
 auto main() -> int
 {
-    ::GetHvec().Reg<::CopyFileA_Hook>(::CopyFileA);
-    ::GetHvec().Reg<::MessageBoxA_Hook>(::MessageBoxA);
-    ::GetHvec().Reg<::FooThisCall_Hook>(::FoolThisCall);
-    ::GetHvec().Reg<::FooCdeclCall_Hook>(::FooCdeclCall);
-    ::GetHvec().Reg<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleA(nullptr) + 0x100));
-    ::GetHvec().AttachAll();
+    ::sg_Hvec.Reg<::CopyFileA_Hook>(::CopyFileA);
+    ::sg_Hvec.Reg<::MessageBoxA_Hook>(::MessageBoxA);
+    ::sg_Hvec.Reg<::FooThisCall_Hook>(::FoolThisCall);
+    ::sg_Hvec.Reg<::FooCdeclCall_Hook>(::FooCdeclCall);
+    ::sg_Hvec.Reg<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleA(nullptr) + 0x100));
+    ::sg_Hvec.Commit();
 
     ::FooCdeclCall("hook this!");
     ::MessageBoxA(nullptr, "test", nullptr, NULL);
