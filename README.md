@@ -23,6 +23,7 @@ static auto __stdcall MessageBoxA_Hook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaptio
     return sg_MsgBoxAHook.GetRaw<::MessageBoxA_Hook>()(hWnd, lpText, lpCaption, uType);
 }
 
+
 auto main(void) -> int
 {
     sg_MsgBoxAHook.Reg<::MessageBoxA_Hook>(::MessageBoxA);
@@ -73,6 +74,7 @@ static auto __cdecl ReadScript_Hook(const char* cpText) -> int
 {
     return sg_MyHooker.GetRaw<::ReadScript_Hook>()(cpText);
 }
+
 
 auto main(void) -> int
 {
