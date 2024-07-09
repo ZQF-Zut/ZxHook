@@ -26,7 +26,7 @@ static auto __stdcall MessageBoxA_Hook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaptio
 
 auto main(void) -> int
 {
-    sg_MsgBoxAHook.Reg<::MessageBoxA_Hook>(::MessageBoxA);
+    sg_MsgBoxAHook.Add<::MessageBoxA_Hook>(::MessageBoxA);
     sg_MsgBoxAHook.Commit();
 }
 ```
@@ -78,9 +78,9 @@ static auto __cdecl ReadScript_Hook(const char* cpText) -> int
 
 auto main(void) -> int
 {
-    sg_MyHooker.Reg<::MessageBoxA_Hook>(::MessageBoxA);
-    sg_MyHooker.Reg<::CopyFileA_Hook>(::CopyFileA);
-    sg_MyHooker.Reg<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleW(nullptr) + 0x532C));
+    sg_MyHooker.Add<::MessageBoxA_Hook>(::MessageBoxA);
+    sg_MyHooker.Add<::CopyFileA_Hook>(::CopyFileA);
+    sg_MyHooker.Add<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleW(nullptr) + 0x532C));
     sg_MyHooker.Commit();
 }
 ```
