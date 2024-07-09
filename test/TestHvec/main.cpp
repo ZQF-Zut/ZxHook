@@ -83,11 +83,11 @@ static auto __stdcall CopyFileA_Hook(LPCSTR lpExistingFileName, LPCSTR lpNewFile
 
 auto main() -> int
 {
-    ::sg_MultiHooker.Reg<::CopyFileA_Hook>(::CopyFileA);
-    ::sg_MultiHooker.Reg<::MessageBoxA_Hook>(::MessageBoxA);
-    ::sg_MultiHooker.Reg<::FooThisCall_Hook>(::FoolThisCall);
-    ::sg_MultiHooker.Reg<::FooCdeclCall_Hook>(::FooCdeclCall);
-    ::sg_MultiHooker.Reg<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleA(nullptr) + 0x100));
+    ::sg_MultiHooker.Add<::CopyFileA_Hook>(::CopyFileA);
+    ::sg_MultiHooker.Add<::MessageBoxA_Hook>(::MessageBoxA);
+    ::sg_MultiHooker.Add<::FooThisCall_Hook>(::FoolThisCall);
+    ::sg_MultiHooker.Add<::FooCdeclCall_Hook>(::FooCdeclCall);
+    ::sg_MultiHooker.Add<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleA(nullptr) + 0x100));
     ::sg_MultiHooker.Commit();
 
     ::FooCdeclCall("hook this!");

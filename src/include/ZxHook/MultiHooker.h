@@ -47,7 +47,7 @@ namespace ZQF::ZxHook
 
     public:
         template <auto pHookFuncPtr>
-        auto Reg(decltype(pHookFuncPtr) pRawFuncPtr) noexcept -> auto&
+        auto Add(decltype(pHookFuncPtr) pRawFuncPtr) noexcept -> auto&
         {
             constexpr auto index = MultiHooker::GetIndex<pHookFuncPtr>();
             m_aIndex[index].pRaw = reinterpret_cast<void*>(pRawFuncPtr);
