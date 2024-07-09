@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <Windows.h>
-#include <ZxHook/Hvec.h>
+#include <ZxHook/MultiHooker.h>
 
 
 // user func
@@ -19,13 +19,13 @@ static auto __cdecl FooCdeclCall(const char* cpText) -> int
     return 10;
 }
 
-// custom hvec type decl
+// custom multi hooker type decl
 static auto __stdcall MessageBoxA_Hook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)->INT;
 static auto __stdcall CopyFileA_Hook(LPCSTR lpExistingFileName, LPCSTR lpNewFileName, BOOL bFailIfExists)->BOOL;
 static auto __cdecl ReadScript_Hook(const char* cpText) -> int;
 static auto __cdecl FooCdeclCall_Hook(const char* cpText) -> int;
 static auto __fastcall FooThisCall_Hook(int ecx, int edx, const char* cpText) -> int;
-using MyHvec_t = ZQF::ZxHook::MakeHvecType
+using MyMakeMultiHooker_t = ZQF::ZxHook::MakeMultiHookerType
 <
     (void*)MessageBoxA_Hook,
     (void*)CopyFileA_Hook,
@@ -37,14 +37,14 @@ using MyHvec_t = ZQF::ZxHook::MakeHvecType
 // hook func type
 using Fn_ReadScript_t = decltype(&::ReadScript_Hook);
 
-// instantiate custom hvec type 
-static auto sg_Hvec = MyHvec_t{};
+// instantiate custom multi hooker type 
+static auto sg_MultiHooker = MyMakeMultiHooker_t{};
 
 // hvec auxiliary func
 template <auto pHokFuncPtr>
 static auto GetHvecRaw() noexcept
 {
-    return sg_Hvec.GetRaw<pHokFuncPtr>();
+    return sg_MultiHooker.GetRaw<pHokFuncPtr>();
 }
 
 // hook function imp
@@ -83,12 +83,12 @@ static auto __stdcall CopyFileA_Hook(LPCSTR lpExistingFileName, LPCSTR lpNewFile
 
 auto main() -> int
 {
-    ::sg_Hvec.Reg<::CopyFileA_Hook>(::CopyFileA);
-    ::sg_Hvec.Reg<::MessageBoxA_Hook>(::MessageBoxA);
-    ::sg_Hvec.Reg<::FooThisCall_Hook>(::FoolThisCall);
-    ::sg_Hvec.Reg<::FooCdeclCall_Hook>(::FooCdeclCall);
-    ::sg_Hvec.Reg<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleA(nullptr) + 0x100));
-    ::sg_Hvec.Commit();
+    ::sg_MultiHooker.Reg<::CopyFileA_Hook>(::CopyFileA);
+    ::sg_MultiHooker.Reg<::MessageBoxA_Hook>(::MessageBoxA);
+    ::sg_MultiHooker.Reg<::FooThisCall_Hook>(::FoolThisCall);
+    ::sg_MultiHooker.Reg<::FooCdeclCall_Hook>(::FooCdeclCall);
+    ::sg_MultiHooker.Reg<::ReadScript_Hook>(reinterpret_cast<Fn_ReadScript_t>(::GetModuleHandleA(nullptr) + 0x100));
+    ::sg_MultiHooker.Commit();
 
     ::FooCdeclCall("hook this!");
     ::MessageBoxA(nullptr, "test", nullptr, NULL);

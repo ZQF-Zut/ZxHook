@@ -9,7 +9,7 @@
 namespace ZQF::ZxHook
 {
     template <void*... HookFuns>
-    class Hvec
+    class MultiHooker
     {
     public:
         enum class Backend
@@ -45,14 +45,14 @@ namespace ZQF::ZxHook
                 seq++;
             }
 
-            throw std::runtime_error("Hvec::GetIndex: not find hook function ptr");
+            throw std::runtime_error("MultiHooker::GetIndex: not find hook function ptr");
         }
 
     public:
         template <auto pHookFuncPtr>
         auto Reg(decltype(pHookFuncPtr) pRawFuncPtr) noexcept -> auto&
         {
-            constexpr size_t index = Hvec::GetIndex<pHookFuncPtr>();
+            constexpr size_t index = MultiHooker::GetIndex<pHookFuncPtr>();
             m_aIndex[index].pRaw = reinterpret_cast<void*>(pRawFuncPtr);
             m_aIndex[index].pHook = reinterpret_cast<void*>(pHookFuncPtr);
             return this->GetEntry(index);
@@ -61,14 +61,14 @@ namespace ZQF::ZxHook
         template <auto pHokFuncPtr>
         auto GetRaw() noexcept
         {
-            constexpr size_t index = Hvec::GetIndex<pHokFuncPtr>();
+            constexpr size_t index = MultiHooker::GetIndex<pHokFuncPtr>();
             return reinterpret_cast<decltype(pHokFuncPtr)>(this->GetEntry(index).pRaw);
         }
 
-        template <Hvec::Backend eBackend = Hvec::Backend::Detours>
+        template <MultiHooker::Backend eBackend = MultiHooker::Backend::Detours>
         auto Commit() -> void
         {
-            if constexpr (eBackend == Hvec::Backend::Detours)
+            if constexpr (eBackend == MultiHooker::Backend::Detours)
             {
                 ::DetourTransactionBegin();
                 ::DetourUpdateThread(GetCurrentThread());
@@ -80,19 +80,19 @@ namespace ZQF::ZxHook
 
                 ::DetourTransactionCommit();
             }
-            else if constexpr (eBackend == Hvec::Backend::MinHook)
+            else if constexpr (eBackend == MultiHooker::Backend::MinHook)
             {
-                static_assert(false, "Hvec::Attach<Hvec::Backend::MinHook>: not implementation");
+                static_assert(false, "MultiHooker::Attach<MultiHooker::Backend::MinHook>: not implementation");
             }
             else
             {
-                static_assert(false, "Hvec::Attach<>: unknown backend");
+                static_assert(false, "MultiHooker::Attach<>: unknown backend");
             }
         }
     };
 
     template <void*... HookFuns>
-    using MakeHvecType = Hvec<HookFuns...>;
+    using MakeMultiHookerType = MultiHooker<HookFuns...>;
 
 } // namespace ZxHook
 

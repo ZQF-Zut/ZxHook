@@ -15,7 +15,7 @@ list(APPEND "${PROJECT_NAME}_SRC_FILE"
     "src/ZxHook/Hook.cpp"
     "src/ZxHook/Inject.cpp"
     "src/ZxHook/Mem.cpp"
-    "src/ZxHook/Hvec.cpp")
+    "src/ZxHook/MultiHooker.cpp")
 
 # Set Library
 add_library("${PROJECT_NAME}" "${${PROJECT_NAME}_SRC_FILE}")

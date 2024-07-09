@@ -1,4 +1,4 @@
-#include <ZxHook/Hvec.h>
+#include <ZxHook/MultiHooker.h>
 
 
 namespace ZQF::ZxHook
