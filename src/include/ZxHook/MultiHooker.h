@@ -1,9 +1,8 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include <array>
 #include <detours.h>
-#include <stdexcept>
+#include <array>
 
 
 namespace ZQF::ZxHook
@@ -31,7 +30,7 @@ namespace ZQF::ZxHook
         }
 
         template <auto pHookFuncPtr>
-        static constexpr auto GetIndex() -> size_t
+        static consteval auto GetIndex() -> size_t
         {
             constexpr void* hook_func_array[] = { HookFuns... };
 
@@ -44,15 +43,13 @@ namespace ZQF::ZxHook
                 }
                 seq++;
             }
-
-            throw std::runtime_error("MultiHooker::GetIndex: not find hook function ptr");
         }
 
     public:
         template <auto pHookFuncPtr>
         auto Reg(decltype(pHookFuncPtr) pRawFuncPtr) noexcept -> auto&
         {
-            constexpr size_t index = MultiHooker::GetIndex<pHookFuncPtr>();
+            constexpr auto index = MultiHooker::GetIndex<pHookFuncPtr>();
             m_aIndex[index].pRaw = reinterpret_cast<void*>(pRawFuncPtr);
             m_aIndex[index].pHook = reinterpret_cast<void*>(pHookFuncPtr);
             return this->GetEntry(index);
@@ -61,7 +58,7 @@ namespace ZQF::ZxHook
         template <auto pHokFuncPtr>
         auto GetRaw() noexcept
         {
-            constexpr size_t index = MultiHooker::GetIndex<pHokFuncPtr>();
+            constexpr auto index = MultiHooker::GetIndex<pHokFuncPtr>();
             return reinterpret_cast<decltype(pHokFuncPtr)>(this->GetEntry(index).pRaw);
         }
 
