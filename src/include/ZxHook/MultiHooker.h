@@ -1,14 +1,12 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <detours.h>
-#include <array>
+#include <memory>
+#include <ZxHook/Hook.h>
 
 
-namespace ZQF::ZxHook
+namespace ZQF::ZxHook::Private
 {
     template <void*... HookFuns>
-    class MultiHooker
+    class MultiHookerImp
     {
     public:
         enum class Backend
@@ -22,7 +20,7 @@ namespace ZQF::ZxHook
             void* pRaw;
             void* pHook;
         };
-        std::array<Entry, sizeof...(HookFuns)> m_aIndex;
+        Entry m_aIndex[sizeof...(HookFuns)]{};
 
         auto GetEntry(size_t nIndex) noexcept -> Entry&
         {
@@ -49,47 +47,117 @@ namespace ZQF::ZxHook
         template <auto pHookFuncPtr>
         auto Add(decltype(pHookFuncPtr) pRawFuncPtr) noexcept -> auto&
         {
-            constexpr auto index = MultiHooker::GetIndex<pHookFuncPtr>();
+            constexpr auto index = MultiHookerImp::GetIndex<pHookFuncPtr>();
             m_aIndex[index].pRaw = reinterpret_cast<void*>(pRawFuncPtr);
             m_aIndex[index].pHook = reinterpret_cast<void*>(pHookFuncPtr);
             return this->GetEntry(index);
         }
 
+        template <auto pHookFuncPtr>
+        auto Add(size_t nImageBase, size_t nRva) noexcept -> auto&
+        {
+            return this->Add<pHookFuncPtr>(reinterpret_cast<decltype(pHookFuncPtr)>(nImageBase + nRva));
+        }
+
         template <auto pHokFuncPtr>
         auto GetRaw() noexcept
         {
-            constexpr auto index = MultiHooker::GetIndex<pHokFuncPtr>();
+            constexpr auto index = MultiHookerImp::GetIndex<pHokFuncPtr>();
             return reinterpret_cast<decltype(pHokFuncPtr)>(this->GetEntry(index).pRaw);
         }
 
-        template <MultiHooker::Backend eBackend = MultiHooker::Backend::Detours>
+        template <MultiHookerImp::Backend eBackend = MultiHookerImp::Backend::Detours>
         auto Commit() -> void
         {
-            if constexpr (eBackend == MultiHooker::Backend::Detours)
+            if constexpr (eBackend == MultiHookerImp::Backend::Detours)
             {
-                ::DetourTransactionBegin();
-                ::DetourUpdateThread(GetCurrentThread());
+                ZxHook::Detours::Begin();
 
                 for (auto& entry : m_aIndex)
                 {
-                    ::DetourAttach(&entry.pRaw, entry.pHook);
+                    if (entry.pRaw == nullptr) { continue; }
+                    ZxHook::Detours::Attach(&entry.pRaw, entry.pHook);
                 }
 
-                ::DetourTransactionCommit();
+                ZxHook::Detours::Commit();
             }
-            else if constexpr (eBackend == MultiHooker::Backend::MinHook)
+            else if constexpr (eBackend == MultiHookerImp::Backend::MinHook)
             {
-                static_assert(false, "MultiHooker::Attach<MultiHooker::Backend::MinHook>: not implementation");
+                static_assert(false, "MultiHookerImp::Attach<MultiHookerImp::Backend::MinHook>: not implementation");
             }
             else
             {
-                static_assert(false, "MultiHooker::Attach<>: unknown backend");
+                static_assert(false, "MultiHookerImp::Attach<>: unknown backend");
             }
         }
     };
 
+} // namespace ZQF::ZxHook::Private
+
+
+namespace ZQF::ZxHook
+{
+
     template <void*... HookFuns>
-    using MakeMultiHookerType = MultiHooker<HookFuns...>;
+    using MakeMultiHookerType = Private::MultiHookerImp<HookFuns...>;
+
+
+    template<class MutiHookerType>
+    class MultiHookerInstance
+    {
+    private:
+        inline static MutiHookerType* sg_pMultiHooker;
+
+    public:
+        using Backend = MutiHookerType::Backend;
+
+    public:
+        MultiHookerInstance() {}
+
+        template<bool isCompact = false>
+        static auto Create() -> void
+        {
+            if constexpr (isCompact)
+            {
+                sg_pMultiHooker = new MutiHookerType{};
+            }
+            else
+            {
+                static auto inst = MutiHookerType{};
+                sg_pMultiHooker = &inst;
+            }
+        }
+
+        template <MultiHookerInstance::Backend eBackend = MultiHookerInstance::Backend::Detours>
+        static auto Commit() -> void
+        {
+            MultiHookerInstance::Get().Commit<eBackend>();
+        }
+
+
+        static auto Get() -> auto&
+        {
+            return *sg_pMultiHooker;
+        }
+
+        template <auto pHokFuncPtr>
+        static auto GetRaw()
+        {
+            return MultiHookerInstance::Get().GetRaw<pHokFuncPtr>();
+        }
+
+        template <auto pHookFuncPtr>
+        static auto Add(decltype(pHookFuncPtr) pRawFuncPtr) noexcept -> void
+        {
+            MultiHookerInstance::Get().Add<pHookFuncPtr>(pRawFuncPtr);
+        }
+
+        template <auto pHookFuncPtr>
+        static auto Add(size_t nImageBase, size_t nRva) noexcept -> void
+        {
+            MultiHookerInstance::Get().Add<pHookFuncPtr>(nImageBase, nRva);
+        }
+    };
 
 } // namespace ZxHook
 

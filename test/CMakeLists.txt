@@ -1,4 +1,5 @@
-add_subdirectory(TestHvec)
+add_subdirectory(TestMultiHooker)
+add_subdirectory(TestSingleHooker)
 add_subdirectory(SampleDll)
 add_subdirectory(SampleExe)
 add_subdirectory(SampleInjector)
