@@ -5,6 +5,25 @@
 
 namespace ZQF::ZxHook::Private
 {
+    template <auto Func, auto FuncList>
+    struct FuncIndex
+    {
+        static consteval auto GetIndex() -> size_t
+        {
+            for (size_t i = 0; i < FuncList.size(); i++)
+            {
+                if ((void*)Func == FuncList[i]) { return i; }
+            }
+        }
+
+        static constexpr auto Val = FuncIndex::GetIndex();
+    };
+
+    template<auto Func, auto FuncList>
+    constexpr auto FuncIndex_V = FuncIndex<Func, FuncList>::Val;
+
+
+
     template <void*... HookFuns>
     class MultiHookerImp
     {
@@ -32,14 +51,9 @@ namespace ZQF::ZxHook::Private
         {
             constexpr void* hook_func_array[] = { HookFuns... };
 
-            size_t seq = 0;
-            for (auto hook_func_ptr : hook_func_array)
+            for (size_t i = 0; i < sizeof...(HookFuns); i++)
             {
-                if ((void*)pHookFuncPtr == hook_func_ptr)
-                {
-                    return seq;
-                }
-                seq++;
+                if ((void*)pHookFuncPtr == hook_func_array[i]) { return i; }
             }
         }
 
