@@ -3,16 +3,11 @@
 ## Quick Start
 - single hook
 ```c++
-#include <ZxHook/MultiHooker.h>
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <ZxHook/SingleHooker.h>
 
 
-// hook func decl
-static auto __stdcall MessageBoxA_Hook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType) -> INT;
-
-// create hooker
-static auto sg_MsgBoxAHook = ZQF::ZxHook::MultiHooker<(void*)MessageBoxA_Hook>{};
-
-// hook func imp
 static auto __stdcall MessageBoxA_Hook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType) -> INT
 {
     if (::strcmp(lpText, "test") == 0)
@@ -20,14 +15,13 @@ static auto __stdcall MessageBoxA_Hook(HWND hWnd, LPCSTR lpText, LPCSTR lpCaptio
         lpText = "Hooked";
     }
 
-    return sg_MsgBoxAHook.GetRaw<::MessageBoxA_Hook>()(hWnd, lpText, lpCaption, uType);
+    return ZQF::ZxHook::SingleHooker<::MessageBoxA_Hook>::FnRaw(hWnd, lpText, lpCaption, uType);
 }
 
 
 auto main(void) -> int
 {
-    sg_MsgBoxAHook.Add<::MessageBoxA_Hook>(::MessageBoxA);
-    sg_MsgBoxAHook.Commit();
+    ZQF::ZxHook::SingleHooker<::MessageBoxA_Hook>::Commit(::MessageBoxA);
 }
 ```
 
