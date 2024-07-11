@@ -37,7 +37,7 @@ using MyMultiHooker_t = ZQF::ZxHook::MakeMultiHookerType
     (void*)FooThisCall_Hook
 >;
 
-using MyMultiHookerIns = ZQF::ZxHook::MultiHookerInstance<MyMultiHooker_t>;
+using MyMultiHookerIns = ZQF::ZxHook::MakeMultiHookerInstance<MyMultiHooker_t>;
 
 // hook function imp
 static auto __cdecl ReadScript_Hook(const char* cpText) -> int
@@ -80,7 +80,7 @@ using YourMultiHooker_t = ZQF::ZxHook::MakeMultiHookerType
     (void*)MessageBoxW_Hook,
     (void*)CopyFileW_Hook
 >;
-using YourMultiHookerIns = ZQF::ZxHook::MultiHookerInstance<YourMultiHooker_t>;
+using YourMultiHookerIns = ZQF::ZxHook::MakeMultiHookerInstance<YourMultiHooker_t>;
 
 static auto __stdcall MessageBoxW_Hook(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType) -> INT
 {

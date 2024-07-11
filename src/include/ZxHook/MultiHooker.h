@@ -173,6 +173,9 @@ namespace ZQF::ZxHook
         }
     };
 
+
+    template <class MutiHookerType>
+    using MakeMultiHookerInstance = MultiHookerInstance<MutiHookerType>;
 } // namespace ZxHook
 
 
