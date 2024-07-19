@@ -1,16 +1,12 @@
 # OutPath
 if (CMAKE_SIZEOF_VOID_P EQUAL 4)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/x32-${CMAKE_BUILD_TYPE}/")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/x32-${CMAKE_BUILD_TYPE}/")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/x32-${CMAKE_BUILD_TYPE}/")
 else()
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/x64-${CMAKE_BUILD_TYPE}/")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/x64-${CMAKE_BUILD_TYPE}/")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/x64-${CMAKE_BUILD_TYPE}/")
 endif()
 
 # Link
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     # LTCG
     cmake_policy(SET CMP0069 NEW) 
     set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
@@ -26,20 +22,23 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(BUILD_SHARED_LIBS OFF)
 
     # Static Runtime
-    set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
+    if(MSVC)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
+    else()
+        add_compile_options(-ffunction-sections)
+        add_compile_options(-fdata-sections)
+        add_link_options(-static)
+        add_link_options(-Wl,--gc-sections)
+        if(NOT CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+            add_link_options(-s)
+        endif()
+    endif()
 endif()
 
 # Compiler
 if(MSVC)
-    # Macro
-    add_definitions(-DUNICODE -D_UNICODE)
-    
-    # Compile Flags
-    add_compile_options(/W4)
     if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
         add_compile_options(/Gy)
         add_compile_options(/Zc:inline)
     endif()
-else()
-    add_compile_options(-Wextra)
 endif()
