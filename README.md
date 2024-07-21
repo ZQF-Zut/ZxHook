@@ -1,4 +1,5 @@
-# Zut::ZxHook
+# ZxHook
+x86 Hooking Wrapper
 
 ## Quick Start
 - single hook
