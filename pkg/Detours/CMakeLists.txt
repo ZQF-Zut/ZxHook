@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 project(Detours_Main)
 
-if(NOT MSVC)
-  message(FATAL_ERROR "Detours Only MSVC")
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  message(FATAL_ERROR "Detours Only Windows")
 endif()
 
 

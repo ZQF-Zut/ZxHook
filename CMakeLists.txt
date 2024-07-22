@@ -1,12 +1,12 @@
 # Main CMakeLists
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 # Project Name
 project(Zut_ZxHook_Main)
 
 # Only Windows
-if(NOT MSVC)
-    message(FATAL_ERROR "Zut::ZxHook Only MSVC")
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  message(FATAL_ERROR "Zut::ZxHook Only Windows")
 endif()
 
 # On Test Preset

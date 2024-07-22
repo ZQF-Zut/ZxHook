@@ -1,5 +1,5 @@
 # Main CMakeLists
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 # Project Name
 project(Zut_ZxHook)
@@ -24,6 +24,8 @@ add_library(Zut::ZxHook ALIAS "${PROJECT_NAME}")
 target_include_directories("${PROJECT_NAME}" PUBLIC "include")
 target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_23)
 target_compile_options("${PROJECT_NAME}" PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+# Packages
 target_link_libraries("${PROJECT_NAME}" PRIVATE Detours::Detours)
 
 # Warning
