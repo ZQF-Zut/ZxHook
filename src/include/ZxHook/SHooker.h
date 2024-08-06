@@ -42,9 +42,9 @@ namespace ZQF::ZxHook
 
         static auto Commit(SHooker::FnType_t pRawFunc) -> void
         {
-            SHookerDetour::Begin();
+            SHookerDetour::CommitBeg();
             SHooker::Attach(pRawFunc);
-            SHookerDetour::Commit();
+            SHookerDetour::CommitEnd();
         }
 
         static auto Commit(const std::size_t nRawFuncVA) -> void
