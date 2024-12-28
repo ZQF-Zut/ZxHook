@@ -9,42 +9,46 @@
 namespace ZQF::ZxHook
 {
 #ifndef _WIN64
-    auto Transfer::CtrlFlow(void* pFunc, void* pDest, size_t nCoverSize, uint8_t ucAsmCode) -> void
+    auto Transfer::CtrlFlow(void* pFunc, void* pDest, const std::size_t nCoverSize, const std::uint8_t ucAsmCode) -> void
     {
-        SysMemAccess(pFunc, nCoverSize, PAGE_EXECUTE_READWRITE, nullptr, L"Transfer::Set Failed!", true);
+        const auto status = ZxHook::SysMemAccess(std::size_t(pFunc), nCoverSize, PAGE_EXECUTE_READWRITE);
+        if (status == false) { ZxHook::SysErrorMsgBox(L"Transfer::CtrlFlow: failed!", true); return; }
+
         *(uint8_t*)((uint8_t*)pFunc + 0) = ucAsmCode;
         *(uint32_t*)((uint8_t*)pFunc + 1) = (uint32_t)pDest - (uint32_t)pFunc - 5;
         (nCoverSize > 0x5) ? (void)memset((uint8_t*)pFunc + 0x5, 0x90, nCoverSize - 0x5) : (void)nullptr;
     }
 
-    auto Transfer::AutoReturn(void* pFunc, void* pDest, size_t nCoverSize) -> void
+    auto Transfer::AutoReturn(void* pFunc, void* pDest, const std::size_t nCoverSize) -> void
     {
-        size_t rva = 0;
-        uint8_t raw_jmp_asm[] = { 0xE9, 0x00, 0x00, 0x00, 0x00 };
-        uint8_t ret_jmp_asm[] = { 0xE9, 0x00, 0x00, 0x00, 0x00 };
-        uint8_t tar_cal_asm[] = { 0xE8, 0x00, 0x00, 0x00, 0x00 };
+        std::size_t rva{};
+        std::uint8_t raw_jmp_asm[] = { 0xE9, 0x00, 0x00, 0x00, 0x00 };
+        std::uint8_t ret_jmp_asm[] = { 0xE9, 0x00, 0x00, 0x00, 0x00 };
+        std::uint8_t tar_cal_asm[] = { 0xE8, 0x00, 0x00, 0x00, 0x00 };
 
-        SysMemAccess(pFunc, 0x1000, PAGE_EXECUTE_READWRITE, nullptr, L"Transfer::Set SysMemAccess Failed!", true);
+        const auto status = ZxHook::SysMemAccess(std::size_t(pFunc), 0x1000, PAGE_EXECUTE_READWRITE);
+        if (status == false) { ZxHook::SysErrorMsgBox(L"Transfer::AutoReturn: SysMemAccess failed!", true); }
 
-        uint8_t* code_buffer = (uint8_t*)SysMemAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE, L"Transfer::Set SysMemAlloc Failed!", true);
+        const auto code_buffer = (std::uint8_t*)ZxHook::SysMemAlloc(0x1000, PAGE_EXECUTE_READWRITE);
+        if (code_buffer == nullptr) { ZxHook::SysErrorMsgBox(L"Transfer::AutoReturn: SysMemAlloc failed!", true); return; }
 
         // Copy the Code for the original address to alloc address
-        memcpy(code_buffer, pFunc, nCoverSize);
+        std::memcpy(code_buffer, pFunc, nCoverSize);
 
         // Write Jmp Code
-        rva = (size_t)code_buffer - (size_t)pFunc - sizeof(raw_jmp_asm);
-        memcpy(raw_jmp_asm + 1, &rva, sizeof(size_t));
-        memcpy(pFunc, raw_jmp_asm, sizeof(raw_jmp_asm));
+        rva = (std::size_t)code_buffer - (std::size_t)pFunc - sizeof(raw_jmp_asm);
+        std::memcpy(raw_jmp_asm + 1, &rva, sizeof(std::size_t));
+        std::memcpy(pFunc, raw_jmp_asm, sizeof(raw_jmp_asm));
 
         // Write Call TarFunc Code
-        rva = (size_t)pDest - (size_t)(code_buffer + nCoverSize) - sizeof(tar_cal_asm);
-        memcpy(tar_cal_asm + 1, &rva, sizeof(size_t));
-        memcpy(code_buffer + nCoverSize, tar_cal_asm, sizeof(tar_cal_asm));
+        rva = (std::size_t)pDest - (std::size_t)(code_buffer + nCoverSize) - sizeof(tar_cal_asm);
+        std::memcpy(tar_cal_asm + 1, &rva, sizeof(std::size_t));
+        std::memcpy(code_buffer + nCoverSize, tar_cal_asm, sizeof(tar_cal_asm));
 
         // Write Ret Code
-        rva = ((size_t)pFunc + nCoverSize) - (size_t)(code_buffer + nCoverSize + sizeof(tar_cal_asm)) - sizeof(ret_jmp_asm);
-        memcpy(ret_jmp_asm + 1, &rva, sizeof(size_t));
-        memcpy(code_buffer + nCoverSize + sizeof(tar_cal_asm), ret_jmp_asm, sizeof(ret_jmp_asm));
+        rva = ((std::size_t)pFunc + nCoverSize) - (std::size_t)(code_buffer + nCoverSize + sizeof(tar_cal_asm)) - sizeof(ret_jmp_asm);
+        std::memcpy(ret_jmp_asm + 1, &rva, sizeof(std::size_t));
+        std::memcpy(code_buffer + nCoverSize + sizeof(tar_cal_asm), ret_jmp_asm, sizeof(ret_jmp_asm));
     }
 
 
@@ -53,10 +57,10 @@ namespace ZQF::ZxHook
     {
         void** fn_tpl_pp = (void**)ppFunc;
         void* fn_tpl = *fn_tpl_pp;
-        return SysMemFree(fn_tpl);
+        return SysMemFree(std::size_t(fn_tpl));
     }
 
-    auto Trampoline::Alloc(void* pFunc, size_t nCopySize) -> void*
+    auto Trampoline::Alloc(void* pFunc, std::size_t nCopySize) -> void*
     {
         uint32_t copy_src_func_asm_size = (uint32_t)nCopySize;
         uint32_t trampoline_func_size = copy_src_func_asm_size + 5;
@@ -72,7 +76,7 @@ namespace ZQF::ZxHook
         return nullptr;
     }
 
-    auto Trampoline::Attach(void* ppFunc, size_t nCoverSize, void* pDetour) -> void
+    auto Trampoline::Attach(void* ppFunc, std::size_t nCoverSize, void* pDetour) -> void
     {
         void** fn_org_pp = (void**)ppFunc;
         void* fn_org = *fn_org_pp;

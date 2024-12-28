@@ -5,13 +5,13 @@
 
 namespace ZQF::ZxHook
 {
-    auto SysErrorMsgBox(const char* cpText, bool isExit) -> void
+    auto SysErrorMsgBox(const char* cpText, const bool isExit) -> void
     {
         ::MessageBoxA(nullptr, cpText, nullptr, NULL);
         isExit ? (::ExitProcess(static_cast<UINT>(-1))) : ((void)nullptr);
     }
 
-    auto SysErrorMsgBox(const wchar_t* wpText, bool isExit) -> void
+    auto SysErrorMsgBox(const wchar_t* wpText, const bool isExit) -> void
     {
         ::MessageBoxW(nullptr, wpText, nullptr, NULL);
         isExit ? (::ExitProcess(static_cast<UINT>(-1))) : ((void)nullptr);

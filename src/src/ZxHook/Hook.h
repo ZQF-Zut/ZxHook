@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 
 
@@ -8,8 +9,8 @@ namespace ZQF::ZxHook
     class Transfer
     {
     public:
-        static auto CtrlFlow(void* pFunc, void* pDest, size_t nCoverSize, uint8_t ucAsmCode) -> void;
-        static auto AutoReturn(void* pFunc, void* pDest, size_t nCoverSize) -> void;
+        static auto CtrlFlow(void* pFunc, void* pDest, const std::size_t nCoverSize, const std::uint8_t ucAsmCode) -> void;
+        static auto AutoReturn(void* pFunc, void* pDest, const std::size_t nCoverSize) -> void;
     };
 
     class Trampoline
