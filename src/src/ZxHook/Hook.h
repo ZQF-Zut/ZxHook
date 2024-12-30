@@ -1,6 +1,8 @@
 #pragma once
+#include <span>
 #include <cstddef>
 #include <cstdint>
+#include <ZxHook/Mem.h>
 
 
 namespace ZQF::ZxHook
@@ -8,19 +10,24 @@ namespace ZQF::ZxHook
 #ifndef _WIN64
     class Transfer
     {
+    private:
+        VirtualAddress m_vaSrc;
+        VirtualAddress m_vaDst;
+        std::size_t m_nCoverBytes;
+
     public:
-        static auto CtrlFlow(void* pFunc, void* pDest, const std::size_t nCoverSize, const std::uint8_t ucAsmCode) -> void;
-        static auto AutoReturn(void* pFunc, void* pDest, const std::size_t nCoverSize) -> void;
+        Transfer(const VirtualAddress vaSrc, const VirtualAddress vaDst, const std::size_t nCoverBytes);
+
+    public:
+        auto CtrlFlow(const std::uint8_t ucAsmCode) const -> void;
+        auto AutoReturn() const -> void;
     };
 
     class Trampoline
     {
-    private:
-        static auto Free(void* ppFunc) -> bool;
-        static auto Alloc(void* pFunc, size_t nCopySize) -> void*;
-
     public:
-        static auto Attach(void* ppFunc, size_t nCoverSize, void* pDetour) -> void;
+        static auto Detach(void* ppFunc) -> bool;
+        static auto Attach(void* ppFunc, void* pDetour, const std::size_t nCoverBytes) -> void;
     };
 #endif // _WIN64
 
