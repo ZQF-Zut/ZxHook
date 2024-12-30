@@ -39,7 +39,7 @@ namespace ZQF::ZxLoader
         STARTUPINFOW si = { .cb = sizeof(si) };
         PROCESS_INFORMATION pi = { 0 };
         const auto status = ZxCreateProcess(wpExePath, wpCmdLine, nullptr, nullptr, FALSE, CREATE_SUSPENDED, nullptr, nullptr, &si, &pi, nullptr, aDllNames);
-        if (status) { ZxHook::SysErrorMsgBox(L"ZxLoader::CreateProcessWithDll(): failed!", true); }
+        if (status == FALSE) { ZxHook::SysErrorMsgBox(L"ZxLoader::CreateProcessWithDll(): failed!", true); }
         ::ResumeThread(pi.hThread);
         ::CloseHandle(pi.hProcess);
         ::CloseHandle(pi.hThread);
