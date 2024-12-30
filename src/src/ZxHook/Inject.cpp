@@ -8,7 +8,7 @@
 
 namespace ZQF::ZxLoader
 {
-    auto ZxCreateProcess(LPCWSTR lpApplicationName, LPWSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation, const std::array<const char*, ZXLOADER_MAX_DLL_COUNT>& aDllNames) -> void
+    auto ZxCreateProcess(LPCWSTR lpApplicationName, LPWSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation, void* pfCreateProcessW, const std::array<const char*, ZXLOADER_MAX_DLL_COUNT>& aDllNames) -> void
     {
         size_t dll_count{};
         std::array<const char*, ZXLOADER_MAX_DLL_COUNT> dlls_str_array;
@@ -25,7 +25,7 @@ namespace ZQF::ZxLoader
 
         if (dll_count)
         {
-            if (!::DetourCreateProcessWithDllsW(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, static_cast<DWORD>(dll_count), dlls_str_array.data(), NULL))
+            if (!::DetourCreateProcessWithDllsW(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, static_cast<DWORD>(dll_count), dlls_str_array.data(), (PDETOUR_CREATE_PROCESS_ROUTINEW)pfCreateProcessW))
             {
                 ZxHook::SysErrorMsgBox(L"ZxLoader::CreateProcessWithDll(): failed!", true);
             }
@@ -43,7 +43,7 @@ namespace ZQF::ZxLoader
     {
         STARTUPINFOW si = { .cb = sizeof(si) };
         PROCESS_INFORMATION pi = { 0 };
-        ZxCreateProcess(wpExePath, wpCmdLine, nullptr, nullptr, FALSE, CREATE_SUSPENDED, nullptr, nullptr, &si, &pi, aDllNames);
+        ZxCreateProcess(wpExePath, wpCmdLine, nullptr, nullptr, FALSE, CREATE_SUSPENDED, nullptr, nullptr, &si, &pi, nullptr, aDllNames);
         ::ResumeThread(pi.hThread);
         ::CloseHandle(pi.hProcess);
         ::CloseHandle(pi.hThread);
