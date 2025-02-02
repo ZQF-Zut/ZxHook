@@ -10,8 +10,8 @@ namespace ZQF::ZxHook
     public:
         static auto CommitBeg() -> void;
         static auto CommitEnd() -> void;
-        static auto Attach(void* ppFunc, void* pDetour) -> void;
-        static auto Detach(void* ppFunc, void* pDetour) -> void;
+        static auto PushAttach(void* ppFunc, void* pDetour) -> void;
+        static auto PushDetach(void* ppFunc, void* pDetour) -> void;
         static auto AfterWith() -> void;
     };
 
@@ -25,31 +25,31 @@ namespace ZQF::ZxHook
         inline static FnType_t FnRaw;
 
     public:
-        static auto Attach(SHooker::FnType_t pRawFunc) -> void
+        static auto PushAttach(SHooker::FnType_t pRawFunc) -> void
         {
             SHooker::FnRaw = pRawFunc;
-            SHookerDetour::Attach(&FnRaw, FnDetour);
+            SHookerDetour::PushAttach(&FnRaw, FnDetour);
         }
 
-        static auto Attach(const std::size_t nRawFuncVA) -> void
+        static auto PushAttach(const std::size_t nRawFuncVA) -> void
         {
-            SHooker::Attach(reinterpret_cast<SHooker::FnType_t>(nRawFuncVA));
+            SHooker::PushAttach(reinterpret_cast<SHooker::FnType_t>(nRawFuncVA));
         }
 
-        static auto Attach(const std::size_t nImageBase, const std::size_t nRva) -> void
+        static auto PushAttach(const std::size_t nImageBase, const std::size_t nRva) -> void
         {
-            SHooker::Attach(reinterpret_cast<SHooker::FnType_t>(nImageBase + nRva));
+            SHooker::PushAttach(reinterpret_cast<SHooker::FnType_t>(nImageBase + nRva));
         }
 
-        static auto Detach() -> void
+        static auto PushDetach() -> void
         {
-            SHookerDetour::Detach(&FnRaw, FnDetour);
+            SHookerDetour::PushDetach(&FnRaw, FnDetour);
         }
 
         static auto AttachAndCommit(SHooker::FnType_t pRawFunc) -> void
         {
             SHookerDetour::CommitBeg();
-            SHooker::Attach(pRawFunc);
+            SHooker::PushAttach(pRawFunc);
             SHookerDetour::CommitEnd();
         }
 
@@ -66,7 +66,7 @@ namespace ZQF::ZxHook
         static auto DetachAndCommit() -> void
         {
             SHookerDetour::CommitBeg();
-            SHooker::Detach();
+            SHooker::PushDetach();
             SHookerDetour::CommitEnd();
         }
     };

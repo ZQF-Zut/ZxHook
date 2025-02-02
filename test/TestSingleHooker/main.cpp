@@ -66,8 +66,8 @@ auto main() -> int
     ZQF::ZxHook::SHookerDetour::CommitBeg();
     {
         // ZQF::ZxHook::SHooker<MyFool_Hook::Tx_Hook>::Attach((decltype(&MyFool_Hook::Tx_Hook))(MyFool::Tx));
-        ZQF::ZxHook::SHooker<::MessageBoxA_Hook>::Attach(::MessageBoxA);
-        ZQF::ZxHook::SHooker<::MessageBoxW_Hook>::Attach(::MessageBoxW);
+        ZQF::ZxHook::SHooker<::MessageBoxA_Hook>::PushAttach(::MessageBoxA);
+        ZQF::ZxHook::SHooker<::MessageBoxW_Hook>::PushAttach(::MessageBoxW);
         // ZQF::ZxHook::SHooker<::ReadScript_Hook>::Attach(reinterpret_cast<size_t>(::GetModuleHandleA(nullptr)), 0x532C);
     }
     ZQF::ZxHook::SHookerDetour::CommitEnd();

@@ -14,12 +14,12 @@ namespace ZQF::ZxHook
         ZxHook::Detours::Commit();
     }
 
-    auto SHookerDetour::Attach(void* ppFunc, void* pDetour) -> void
+    auto SHookerDetour::PushAttach(void* ppFunc, void* pDetour) -> void
     {
         ZxHook::Detours::Attach(ppFunc, pDetour);
     }
 
-    auto SHookerDetour::Detach(void* ppFunc, void* pDetour) -> void
+    auto SHookerDetour::PushDetach(void* ppFunc, void* pDetour) -> void
     {
         ZxHook::Detours::Detach(ppFunc, pDetour);
     }
