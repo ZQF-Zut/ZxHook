@@ -19,6 +19,11 @@ namespace ZQF::ZxHook
         ZxHook::Detours::Attach(ppFunc, pDetour);
     }
 
+    auto SHookerDetour::Detach(void* ppFunc, void* pDetour) -> void
+    {
+        ZxHook::Detours::Detach(ppFunc, pDetour);
+    }
+
     auto SHookerDetour::AfterWith() -> void
     {
         ZxHook::Detours::AfterWith();
