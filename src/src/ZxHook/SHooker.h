@@ -53,21 +53,21 @@ namespace ZQF::ZxHook
             SHookerDetour::CommitEnd();
         }
 
+        static auto AttachAndCommit(const std::size_t nRawFuncVA) -> void
+        {
+            SHooker::AttachAndCommit(reinterpret_cast<SHooker::FnType_t>(nRawFuncVA));
+        }
+
+        static auto AttachAndCommit(const std::size_t nImageBase, const std::size_t nRva) -> void
+        {
+            SHooker::AttachAndCommit(reinterpret_cast<SHooker::FnType_t>(nImageBase + nRva));
+        }
+
         static auto DetachAndCommit() -> void
         {
             SHookerDetour::CommitBeg();
             SHooker::Detach();
             SHookerDetour::CommitEnd();
-        }
-
-        static auto Commit(const std::size_t nRawFuncVA) -> void
-        {
-            SHooker::Commit(reinterpret_cast<SHooker::FnType_t>(nRawFuncVA));
-        }
-
-        static auto Commit(const std::size_t nImageBase, const std::size_t nRva) -> void
-        {
-            SHooker::Commit(reinterpret_cast<SHooker::FnType_t>(nImageBase + nRva));
         }
     };
 }
