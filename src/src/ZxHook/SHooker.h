@@ -41,20 +41,9 @@ namespace ZQF::ZxHook
             SHooker::Attach(reinterpret_cast<SHooker::FnType_t>(nImageBase + nRva));
         }
 
-        auto Detach(SHooker::FnType_t pRawFunc) -> void
+        auto Detach() -> void
         {
-            SHooker::FnRaw = pRawFunc;
             SHookerDetour::Detach(&FnRaw, FnDetour);
-        }
-
-        static auto Detach(const std::size_t nRawFuncVA) -> void
-        {
-            SHooker::Detach(reinterpret_cast<SHooker::FnType_t>(nRawFuncVA));
-        }
-
-        static auto Detach(const std::size_t nImageBase, const std::size_t nRva) -> void
-        {
-            SHooker::Detach(reinterpret_cast<SHooker::FnType_t>(nImageBase + nRva));
         }
 
         static auto Commit(SHooker::FnType_t pRawFunc) -> void
