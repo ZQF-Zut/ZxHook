@@ -46,10 +46,17 @@ namespace ZQF::ZxHook
             SHookerDetour::Detach(&FnRaw, FnDetour);
         }
 
-        static auto Commit(SHooker::FnType_t pRawFunc) -> void
+        static auto AttachAndCommit(SHooker::FnType_t pRawFunc) -> void
         {
             SHookerDetour::CommitBeg();
             SHooker::Attach(pRawFunc);
+            SHookerDetour::CommitEnd();
+        }
+
+        static auto DetachAndCommit() -> void
+        {
+            SHookerDetour::CommitBeg();
+            SHooker::Detach();
             SHookerDetour::CommitEnd();
         }
 
