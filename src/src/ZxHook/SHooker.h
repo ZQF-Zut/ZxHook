@@ -41,7 +41,7 @@ namespace ZQF::ZxHook
             SHooker::Attach(reinterpret_cast<SHooker::FnType_t>(nImageBase + nRva));
         }
 
-        auto Detach() -> void
+        static auto Detach() -> void
         {
             SHookerDetour::Detach(&FnRaw, FnDetour);
         }
